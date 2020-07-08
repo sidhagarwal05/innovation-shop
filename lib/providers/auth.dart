@@ -69,7 +69,7 @@ class Auth {
     final uid =
         await FirebaseAuth.instance.currentUser().then((value) => value.uid);
     final result = await databaseReference
-        .collection('Outlet')
+        .collection('Users')
         .document(uid)
         .get()
         .then((doc) {
@@ -86,35 +86,5 @@ class Auth {
     } else {
       return false;
     }
-    // return false;
   }
-
-  // Future<bool> updateUserInfo() async {
-  //   final uid = await FirebaseAuth.instance.currentUser().then((value) => value.uid);
-  //     final result = await databaseReference
-  //         .collection('Haryana/1/Palwal/Users/userid')
-  //         .document(uid).setData(data)
-  //         .get()
-  //         .then((doc)
-  //         {
-
-  //             if (doc.exists) {
-
-  //               return true;
-  //           } else {
-
-  //               return false;
-  //           }
-
-  //         });
-  //         if(result)
-  //         {
-  //           return true;
-  //         }
-  //         else
-  //         {
-  //           return false;
-  //         }
-  // }
-
 }
