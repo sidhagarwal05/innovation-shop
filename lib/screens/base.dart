@@ -1,10 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:innovtion/screens/item.dart';
+import 'package:innovtion/screens/user_info.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../providers/auth.dart';
+import 'home.dart';
 
 final _firestore = Firestore.instance;
 FirebaseUser loggedInUser;
@@ -24,8 +28,6 @@ class _BaseState extends State<Base> with SingleTickerProviderStateMixin {
 
   AnimationController _animationController;
   Animation<double> _animation;
-  var username;
-  var city;
   @override
   void dispose() {
     // TODO: implement dispose
@@ -43,7 +45,6 @@ class _BaseState extends State<Base> with SingleTickerProviderStateMixin {
         CurvedAnimation(parent: _animationController, curve: Curves.easeInCirc);
     _animation.addListener(() => this.setState(() {}));
     _animationController.forward();
-    fetchNameAndCity();
   }
 
   void getCurrentUser() async {
@@ -58,24 +59,17 @@ class _BaseState extends State<Base> with SingleTickerProviderStateMixin {
   }
 
   String dropdownValue = '';
-  var _items = ['userprofile', 'logout', 'Inventory'];
-
-  void fetchNameAndCity() async {
-    final pref = await SharedPreferences.getInstance();
-    final dname = await FirebaseAuth.instance
-        .currentUser()
-        .then((value) => value.displayName);
-    print('name $dname');
-    city = pref.getString('city');
-    username = dname;
-  }
+  var _items = [
+    'userprofile',
+    'logout',
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        // centerTitle: true,
-        backgroundColor: Colors.grey[300],
+        centerTitle: true,
+        backgroundColor: Colors.yellowAccent,
         elevation: 0,
         actions: <Widget>[
           Row(
@@ -90,18 +84,13 @@ class _BaseState extends State<Base> with SingleTickerProviderStateMixin {
                   if (dropdownValue == 'logout') {
                     final signoutResult = await Auth().signOut();
                     if (signoutResult) {
-//                    Navigator.of(context)
-//                        .pushReplacementNamed(HomeScreen.routeName);
+                      Navigator.of(context)
+                          .pushReplacementNamed(HomeScreen.routeName);
                     }
                   }
                   if (dropdownValue == 'userprofile') {
-//                  Navigator.of(context).pushNamed(
-//                      UserInfoScreen.routeName,
-//                      arguments: true);
-                  }
-                  if (dropdownValue == 'Inventory') {
-//                  Navigator.of(context).push(MaterialPageRoute(
-//                      builder: (context) => Inventory()));
+                    Navigator.of(context)
+                        .pushNamed(UserInfoScreen.routeName, arguments: true);
                   }
                 },
                 icon: Icon(
@@ -121,7 +110,7 @@ class _BaseState extends State<Base> with SingleTickerProviderStateMixin {
           fit: BoxFit.contain,
           child: RichText(
             text: TextSpan(
-                text: "COMPL",
+                text: "It",
                 style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 35,
@@ -129,7 +118,7 @@ class _BaseState extends State<Base> with SingleTickerProviderStateMixin {
                     color: Colors.black),
                 children: <TextSpan>[
                   TextSpan(
-                      text: "AINTS",
+                      text: "ems",
                       style: TextStyle(
                           letterSpacing: 1,
                           fontSize: 35,
@@ -171,8 +160,12 @@ class MessagesStream extends StatelessWidget {
         List<MessageBubble> messageBubbles = [];
         for (var message in messages) {
           final name = message.data['name'];
+          final image = message.data['image'];
+          final document = message.documentID;
           final messageBubble = MessageBubble(
             name: name,
+            image: image,
+            document: document,
           );
           messageBubbles.add(messageBubble);
         }
@@ -190,9 +183,13 @@ class MessagesStream extends StatelessWidget {
 class MessageBubble extends StatefulWidget {
   MessageBubble({
     this.name,
+    this.image,
+    this.document,
   });
 
   final String name;
+  final String image;
+  final String document;
 
   @override
   _MessageBubbleState createState() => _MessageBubbleState();
@@ -201,8 +198,42 @@ class MessageBubble extends StatefulWidget {
 class _MessageBubbleState extends State<MessageBubble> {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Text(widget.name),
+    return GestureDetector(
+      onTap: () {
+        Navigator.of(context)
+            .pushNamed(Item.routeName, arguments: widget.document);
+      },
+      child: Column(
+        children: <Widget>[
+          Container(
+            width: double.infinity,
+            height: 1,
+            color: Colors.grey[300],
+          ),
+          SizedBox(
+            height: 5,
+          ),
+          Container(
+            color: Colors.transparent,
+            child: Row(
+              mainAxisSize: MainAxisSize.max,
+              children: <Widget>[
+                CircleAvatar(
+                  backgroundImage: NetworkImage(widget.image),
+                  backgroundColor: Colors.transparent,
+                  radius: 30,
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 30),
+                  child: Container(
+                    child: Text(widget.name),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

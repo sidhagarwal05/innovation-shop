@@ -371,8 +371,6 @@ class _UserInfoScreenState extends State<UserInfoScreen>
         await databaseReference.collection("Users").document(uid).setData({
           'name': _nameController.text,
           'phone': _phoneController.text,
-          'status': false,
-          'Paytm': true,
         }).then((value) {
           print("Success");
           return true;

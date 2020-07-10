@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:innovtion/screens/authScreen.dart';
 import 'package:innovtion/screens/base.dart';
 import 'package:innovtion/screens/example.dart';
 import 'package:innovtion/screens/home.dart';
+import 'package:innovtion/screens/item.dart';
 import 'package:innovtion/screens/splash_screen.dart';
 import 'package:innovtion/screens/user_info.dart';
 
@@ -22,11 +22,11 @@ class MyApp extends StatelessWidget {
       ),
       home: SplashScreen(),
       routes: {
-        AuthScreen.routeName: (ctx) => AuthScreen(),
         HomeScreen.routeName: (ctx) => HomeScreen(),
         UserInfoScreen.routeName: (ctx) => UserInfoScreen(),
         ExampleScreen.routeName: (ctx) => ExampleScreen(),
         Base.routeName: (ctx) => Base(),
+        Item.routeName: (ctx) => Item(),
       },
     );
   }
