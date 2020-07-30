@@ -3,7 +3,9 @@ import 'package:innovtion/screens/base.dart';
 import 'package:innovtion/screens/example.dart';
 import 'package:innovtion/screens/home.dart';
 import 'package:innovtion/screens/item.dart';
+import 'package:innovtion/screens/previousOrders.dart';
 import 'package:innovtion/screens/splash_screen.dart';
+import 'package:innovtion/screens/status.dart';
 import 'package:innovtion/screens/user_info.dart';
 
 void main() {
@@ -27,6 +29,8 @@ class MyApp extends StatelessWidget {
         ExampleScreen.routeName: (ctx) => ExampleScreen(),
         Base.routeName: (ctx) => Base(),
         Item.routeName: (ctx) => Item(),
+        Status.routeName: (ctx) => Status(),
+        PreviousOrders.routeName: (ctx) => PreviousOrders(),
       },
     );
   }

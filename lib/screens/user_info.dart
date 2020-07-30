@@ -105,7 +105,7 @@ class _UserInfoScreenState extends State<UserInfoScreen>
                                   width: double.infinity,
                                   padding: EdgeInsets.all(8),
                                   decoration: BoxDecoration(
-                                      color: Colors.grey[300],
+                                      color: Colors.blueGrey[300],
                                       borderRadius: BorderRadius.circular(20)),
                                   child: TextFormField(
                                     keyboardType: TextInputType.text,
@@ -139,7 +139,7 @@ class _UserInfoScreenState extends State<UserInfoScreen>
                                   width: double.infinity,
                                   padding: EdgeInsets.all(8),
                                   decoration: BoxDecoration(
-                                      color: Colors.grey[300],
+                                      color: Colors.blueGrey[300],
                                       borderRadius: BorderRadius.circular(20)),
                                   child: TextFormField(
                                     keyboardType: TextInputType.number,
@@ -172,10 +172,11 @@ class _UserInfoScreenState extends State<UserInfoScreen>
                                 SizedBox(
                                   height: 15,
                                 ),
-                                MaterialButton(
+                                RaisedButton(
+                                  elevation: 4,
                                   padding: EdgeInsets.symmetric(
                                       vertical: 16, horizontal: 38),
-                                  color: Colors.black,
+                                  color: Colors.teal,
                                   textColor: Colors.white,
                                   shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(20)),

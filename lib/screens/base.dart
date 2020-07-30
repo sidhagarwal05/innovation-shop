@@ -3,10 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:innovtion/screens/item.dart';
+import 'package:innovtion/screens/previousOrders.dart';
 import 'package:innovtion/screens/user_info.dart';
-
-import 'package:shared_preferences/shared_preferences.dart';
-
 import '../providers/auth.dart';
 import 'home.dart';
 
@@ -60,6 +58,7 @@ class _BaseState extends State<Base> with SingleTickerProviderStateMixin {
 
   String dropdownValue = '';
   var _items = [
+    'Previous Orders',
     'userprofile',
     'logout',
   ];
@@ -69,8 +68,12 @@ class _BaseState extends State<Base> with SingleTickerProviderStateMixin {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        backgroundColor: Colors.yellowAccent,
+        backgroundColor: Colors.teal,
         elevation: 0,
+        leading: Icon(
+          Icons.image,
+          color: Colors.teal,
+        ),
         actions: <Widget>[
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
@@ -92,6 +95,9 @@ class _BaseState extends State<Base> with SingleTickerProviderStateMixin {
                     Navigator.of(context)
                         .pushNamed(UserInfoScreen.routeName, arguments: true);
                   }
+                  if (dropdownValue == 'Previous Orders') {
+                    Navigator.of(context).pushNamed(PreviousOrders.routeName);
+                  }
                 },
                 icon: Icon(
                   Icons.access_alarm,
@@ -110,19 +116,19 @@ class _BaseState extends State<Base> with SingleTickerProviderStateMixin {
           fit: BoxFit.contain,
           child: RichText(
             text: TextSpan(
-                text: "It",
+                text: "Rest",
                 style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 35,
                     letterSpacing: 1,
-                    color: Colors.black),
+                    color: Colors.white),
                 children: <TextSpan>[
                   TextSpan(
-                      text: "ems",
+                      text: "aurants",
                       style: TextStyle(
                           letterSpacing: 1,
                           fontSize: 35,
-                          color: Colors.grey[500],
+                          color: Colors.white,
                           fontFamily: "Sans Serif"))
                 ]),
           ),
@@ -159,15 +165,23 @@ class MessagesStream extends StatelessWidget {
         final messages = snapshot.data.documents;
         List<MessageBubble> messageBubbles = [];
         for (var message in messages) {
-          final name = message.data['name'];
-          final image = message.data['image'];
-          final document = message.documentID;
-          final messageBubble = MessageBubble(
-            name: name,
-            image: image,
-            document: document,
-          );
-          messageBubbles.add(messageBubble);
+          if (message.data['status'] == true) {
+            final name = message.data['name'];
+            final image = message.data['image'];
+            final minimumPrice = message.data['Minimum Order'];
+            final discount = message.data['Discount'];
+            final deliveryCharge = message.data['Delivery Charge'];
+            final document = message.documentID;
+            final messageBubble = MessageBubble(
+              name: name,
+              image: image,
+              document: document,
+              deliveryCharge: deliveryCharge,
+              discount: discount,
+              minimum: minimumPrice,
+            );
+            messageBubbles.add(messageBubble);
+          }
         }
         return Expanded(
           child: ListView(
@@ -185,12 +199,16 @@ class MessageBubble extends StatefulWidget {
     this.name,
     this.image,
     this.document,
+    this.deliveryCharge,
+    this.discount,
+    this.minimum,
   });
-
   final String name;
   final String image;
   final String document;
-
+  final deliveryCharge;
+  final minimum;
+  final discount;
   @override
   _MessageBubbleState createState() => _MessageBubbleState();
 }
@@ -203,36 +221,64 @@ class _MessageBubbleState extends State<MessageBubble> {
         Navigator.of(context)
             .pushNamed(Item.routeName, arguments: widget.document);
       },
-      child: Column(
-        children: <Widget>[
-          Container(
-            width: double.infinity,
-            height: 1,
-            color: Colors.grey[300],
-          ),
-          SizedBox(
-            height: 5,
-          ),
-          Container(
-            color: Colors.transparent,
-            child: Row(
-              mainAxisSize: MainAxisSize.max,
-              children: <Widget>[
-                CircleAvatar(
-                  backgroundImage: NetworkImage(widget.image),
-                  backgroundColor: Colors.transparent,
-                  radius: 30,
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 30),
-                  child: Container(
-                    child: Text(widget.name),
-                  ),
-                ),
-              ],
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: <Widget>[
+            SizedBox(
+              height: 5,
             ),
-          ),
-        ],
+            Container(
+              color: Colors.transparent,
+              child: Row(
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  Container(
+                    child: widget.image == null
+                        ? null
+                        : Padding(
+                            padding: EdgeInsets.all(
+                                MediaQuery.of(context).size.width * 0.005),
+                            child: Image(
+                              image: NetworkImage(widget.image),
+                              width: MediaQuery.of(context).size.width * 0.20,
+                              height: MediaQuery.of(context).size.width * 0.20,
+                            ),
+                          ),
+                    color: Color.fromRGBO(255, 255, 255, 0.1),
+                    width: MediaQuery.of(context).size.width * 0.20,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 30),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          widget.name,
+                          style: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          "Free Delivery on orders above ₹" +
+                              widget.minimum.toString(),
+                          style: TextStyle(color: Colors.teal),
+                        ),
+                        widget.discount > 0
+                            ? Text(
+                                widget.discount.toString() + "% " + "Discount",
+                                style: TextStyle(
+                                  color: Colors.deepOrange,
+                                ),
+                              )
+                            : Container(),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
