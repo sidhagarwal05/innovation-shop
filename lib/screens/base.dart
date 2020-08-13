@@ -3,10 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:innovtion/screens/item.dart';
-import 'package:innovtion/screens/previousOrders.dart';
-import 'package:innovtion/screens/user_info.dart';
-import '../providers/auth.dart';
-import 'home.dart';
 
 final _firestore = Firestore.instance;
 FirebaseUser loggedInUser;
