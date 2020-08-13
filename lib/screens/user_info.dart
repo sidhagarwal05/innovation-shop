@@ -3,12 +3,19 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:innovtion/data/constants.dart';
+import 'package:innovtion/providers/auth.dart';
+import 'package:innovtion/screens/page.dart';
 
 import 'base.dart';
+import 'home.dart';
+
+bool isupdate = false;
 
 class UserInfoScreen extends StatefulWidget {
   static const routeName = '/user-info';
-
+  UserInfoScreen(bool value) {
+    isupdate = value;
+  }
   @override
   _UserInfoScreenState createState() => _UserInfoScreenState();
 }
@@ -17,7 +24,6 @@ class _UserInfoScreenState extends State<UserInfoScreen>
     with SingleTickerProviderStateMixin {
   final databaseReference = Firestore.instance;
   final _auth = FirebaseAuth.instance;
-  bool isupdate = false;
 
   AnimationController _animationController;
   Animation<double> _animation;
@@ -64,7 +70,7 @@ class _UserInfoScreenState extends State<UserInfoScreen>
       setState(() {
         loading = true;
       });
-      isupdate = ModalRoute.of(context).settings.arguments ?? false;
+
       if (isupdate) {
         final result = await fetchData();
         if (result) {}
@@ -304,7 +310,7 @@ class _UserInfoScreenState extends State<UserInfoScreen>
                                           });
                                           Navigator.of(context)
                                               .pushReplacementNamed(
-                                                  Base.routeName);
+                                                  Page1.routeName);
                                         } else {
                                           print('not done');
                                         }
@@ -315,6 +321,33 @@ class _UserInfoScreenState extends State<UserInfoScreen>
                                     }
                                   },
                                 ),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                isupdate == true
+                                    ? RaisedButton(
+                                        elevation: 4,
+                                        padding: EdgeInsets.symmetric(
+                                            vertical: 16, horizontal: 38),
+                                        color: Colors.teal,
+                                        textColor: Colors.white,
+                                        shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(20)),
+                                        child: Text(
+                                          "LOGOUT",
+                                          style: TextStyle(fontSize: 15),
+                                        ),
+                                        onPressed: () async {
+                                          final signoutResult =
+                                              await Auth().signOut();
+                                          if (signoutResult) {
+                                            Navigator.of(context)
+                                                .pushReplacementNamed(
+                                                    HomeScreen.routeName);
+                                          }
+                                        })
+                                    : Container()
                               ],
                             ),
                           ),

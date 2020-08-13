@@ -11,6 +11,7 @@ import 'home.dart';
 final _firestore = Firestore.instance;
 FirebaseUser loggedInUser;
 int sort = 0;
+PageController pageController;
 
 class Base extends StatefulWidget {
   static const routeName = '/base-screen';
@@ -24,27 +25,6 @@ class _BaseState extends State<Base> with SingleTickerProviderStateMixin {
   final _auth = FirebaseAuth.instance;
   String messageText;
 
-  AnimationController _animationController;
-  Animation<double> _animation;
-  @override
-  void dispose() {
-    // TODO: implement dispose
-    _animationController.dispose();
-    super.dispose();
-  }
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    _animationController =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 600));
-    _animation =
-        CurvedAnimation(parent: _animationController, curve: Curves.easeInCirc);
-    _animation.addListener(() => this.setState(() {}));
-    _animationController.forward();
-  }
-
   void getCurrentUser() async {
     try {
       final user = await _auth.currentUser();
@@ -56,90 +36,74 @@ class _BaseState extends State<Base> with SingleTickerProviderStateMixin {
     }
   }
 
-  String dropdownValue = '';
-  var _items = [
-    'Previous Orders',
-    'userprofile',
-    'logout',
-  ];
+//  String dropdownValue = '';
+//  var _items = [
+//    'Previous Orders',
+//    'userprofile',
+//    'logout',
+//  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        backgroundColor: Colors.teal,
-        elevation: 0,
-        leading: Icon(
-          Icons.image,
-          color: Colors.teal,
-        ),
-        actions: <Widget>[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: <Widget>[
-              DropdownButton(
-                underline: Container(),
-                onChanged: (value) async {
-                  setState(() {
-                    dropdownValue = value;
-                  });
-                  if (dropdownValue == 'logout') {
-                    final signoutResult = await Auth().signOut();
-                    if (signoutResult) {
-                      Navigator.of(context)
-                          .pushReplacementNamed(HomeScreen.routeName);
-                    }
-                  }
-                  if (dropdownValue == 'userprofile') {
-                    Navigator.of(context)
-                        .pushNamed(UserInfoScreen.routeName, arguments: true);
-                  }
-                  if (dropdownValue == 'Previous Orders') {
-                    Navigator.of(context).pushNamed(PreviousOrders.routeName);
-                  }
-                },
-                icon: Icon(
-                  Icons.access_alarm,
-                ),
-                items: _items.map((e) {
-                  return DropdownMenuItem(
-                    child: Text(e),
-                    value: e,
-                  );
-                }).toList(),
-              ),
-            ],
-          ),
-        ],
-        title: FittedBox(
-          fit: BoxFit.contain,
-          child: RichText(
-            text: TextSpan(
-                text: "Rest",
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 35,
-                    letterSpacing: 1,
-                    color: Colors.white),
-                children: <TextSpan>[
-                  TextSpan(
-                      text: "aurants",
-                      style: TextStyle(
-                          letterSpacing: 1,
-                          fontSize: 35,
-                          color: Colors.white,
-                          fontFamily: "Sans Serif"))
-                ]),
-          ),
-        ),
-      ),
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Container(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
+//              Row(
+//                mainAxisAlignment: MainAxisAlignment.end,
+//                children: <Widget>[
+//                  DropdownButton(
+//                    underline: Container(),
+//                    onChanged: (value) async {
+//                      setState(() {
+//                        dropdownValue = value;
+//                      });
+//                      if (dropdownValue == 'logout') {
+//                        final signoutResult = await Auth().signOut();
+//                        if (signoutResult) {
+//                          Navigator.of(context)
+//                              .pushReplacementNamed(HomeScreen.routeName);
+//                        }
+//                      }
+//                      if (dropdownValue == 'userprofile') {
+//                        Navigator.of(context).pushNamed(
+//                            UserInfoScreen.routeName,
+//                            arguments: true);
+//                      }
+//                      if (dropdownValue == 'Previous Orders') {
+//                        Navigator.of(context)
+//                            .pushNamed(PreviousOrders.routeName);
+//                      }
+//                    },
+//                    icon: Icon(
+//                      Icons.person,
+//                      color: Colors.teal,
+//                      size: 40,
+//                    ),
+//                    items: _items.map((e) {
+//                      return DropdownMenuItem(
+//                        child: Text(e),
+//                        value: e,
+//                      );
+//                    }).toList(),
+//                  ),
+//                ],
+//              ),
+              SizedBox(
+                height: 20,
+              ),
+              Center(
+                  child: Text(
+                "Restaurants",
+                style: TextStyle(
+                    color: Colors.teal,
+                    fontSize: 50,
+                    fontWeight: FontWeight.bold),
+              )),
               MessagesStream(),
             ],
           ),

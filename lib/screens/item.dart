@@ -3,12 +3,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_overlay_loader/flutter_overlay_loader.dart';
-import 'package:innovtion/screens/status.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:innovtion/screens/loader.dart';
 
 final _firestore = Firestore.instance;
 FirebaseUser loggedInUser;
 int sort = 0;
+bool open;
+bool loader = true;
 var document;
 bool cartblock;
 Map<String, int> cart = Map();
@@ -17,7 +18,6 @@ int total = 0;
 var hostel;
 List<MessageBubble1> messageBubbles1 = [];
 bool selected = true;
-final _auth = FirebaseAuth.instance;
 var id;
 List<String> depts = [
   "None",
@@ -101,7 +101,7 @@ class _ItemState extends State<Item> with SingleTickerProviderStateMixin {
         ),
         onTap: () {
           messageBubbles1.removeRange(0, messageBubbles1.length);
-          if (hostel == null) {
+          if (hostel == null && selected != false) {
             showDialog(
                 context: context,
                 child: AlertDialog(
@@ -141,7 +141,7 @@ class _ItemState extends State<Item> with SingleTickerProviderStateMixin {
             showModalBottomSheet(
                 context: context,
                 builder: (context) {
-                  return new StreamBuilder(
+                  return StreamBuilder(
                       stream: Firestore.instance
                           .collection('Outlet')
                           .document('$document')
@@ -154,7 +154,7 @@ class _ItemState extends State<Item> with SingleTickerProviderStateMixin {
                         if (finalprice == 0 || finalprice == null) {
                           total = finalprice;
                         } else {
-                          if (finalprice < 100) {
+                          if (finalprice < 100 && selected == true) {
                             total = finalprice -
                                 ((finalprice * userDocument['Discount']) / 100)
                                     .round() +
@@ -206,7 +206,9 @@ class _ItemState extends State<Item> with SingleTickerProviderStateMixin {
                                           MainAxisAlignment.start,
                                       children: <Widget>[
                                         Text(
-                                          'Total Price: ₹ ',
+                                          loader == true
+                                              ? 'Total Price: ₹ '
+                                              : " ",
                                           style: TextStyle(
                                             fontWeight: FontWeight.bold,
                                             fontSize: 17,
@@ -298,7 +300,8 @@ class _ItemState extends State<Item> with SingleTickerProviderStateMixin {
                                         Text(
                                           finalprice == null
                                               ? ""
-                                              : finalprice < 100
+                                              : finalprice < 100 &&
+                                                      selected == true
                                                   ? userDocument[
                                                           'Delivery Charge']
                                                       .toString()
@@ -339,15 +342,52 @@ class _ItemState extends State<Item> with SingleTickerProviderStateMixin {
                                 padding: const EdgeInsets.all(8.0),
                                 child: GestureDetector(
                                   onTap: () async {
-                                    Center(
-                                      child: CircularProgressIndicator(
-                                        backgroundColor: Colors.lightBlueAccent,
-                                      ),
-                                    );
-                                    await sendData();
-                                    Navigator.of(context).pushNamed(
-                                        Status.routeName,
-                                        arguments: id);
+                                    if (finalprice == 0 || finalprice == null) {
+                                      showDialog(
+                                          context: context,
+                                          child: AlertDialog(
+                                            backgroundColor: Colors.white,
+                                            shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(20)),
+                                            title: Text(
+                                              "TRY AGAIN",
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                            content: Text(
+                                              "Please add atleast 1 item to the cart",
+                                            ),
+                                            actions: <Widget>[
+                                              Align(
+                                                child: Padding(
+                                                  padding: const EdgeInsets.all(
+                                                      10.0),
+                                                  child: RaisedButton(
+                                                    color: Colors.teal,
+                                                    child: Text(
+                                                      "Ok",
+                                                      style: TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          color: Colors.white),
+                                                    ),
+                                                    elevation: 2,
+                                                    onPressed: () {
+                                                      Navigator.of(context)
+                                                          .pop();
+                                                    },
+                                                  ),
+                                                ),
+                                              )
+                                            ],
+                                          ));
+                                      print('Select Hostel');
+                                    } else {
+                                      Navigator.of(context).pushNamed(
+                                          Screen.routeName,
+                                          arguments: messageBubbles1);
+                                    }
                                   },
                                   child: Container(
                                     child: Align(
@@ -378,10 +418,7 @@ class _ItemState extends State<Item> with SingleTickerProviderStateMixin {
                           ),
                         );
                       });
-                }
-
-//              }
-                );
+                });
           }
           for (String key in cart.keys) {
             if (cart[key] > 0) {
@@ -619,7 +656,16 @@ class _MessageBubbleState extends State<MessageBubble> {
                 children: <Widget>[
                   Container(
                     child: widget.image == null
-                        ? null
+                        ? Padding(
+                            padding: EdgeInsets.all(
+                                MediaQuery.of(context).size.width * 0.005),
+                            child: Container(
+                              color: Colors.teal,
+                              child: Image(
+                                image: AssetImage('images/newlogo.png'),
+                              ),
+                            ),
+                          )
                         : Padding(
                             padding: EdgeInsets.all(
                                 MediaQuery.of(context).size.width * 0.005),
@@ -806,7 +852,16 @@ class _MessageBubbleState1 extends State<MessageBubble1> {
                 children: <Widget>[
                   Container(
                     child: widget.image == null
-                        ? null
+                        ? Padding(
+                            padding: EdgeInsets.all(
+                                MediaQuery.of(context).size.width * 0.005),
+                            child: Container(
+                              color: Colors.teal,
+                              child: Image(
+                                image: AssetImage('images/newlogo.png'),
+                              ),
+                            ),
+                          )
                         : Padding(
                             padding: EdgeInsets.all(
                                 MediaQuery.of(context).size.width * 0.005),
@@ -864,74 +919,5 @@ class _MessageBubbleState1 extends State<MessageBubble1> {
         SizedBox(height: 10),
       ],
     );
-  }
-}
-
-Future<bool> sendData() async {
-  try {
-    String order = "";
-    for (int i = 1; i < messageBubbles1.length; i++) {
-      order = order +
-          messageBubbles1[i].name +
-          " x " +
-          messageBubbles1[i].count.toString() +
-          ", ";
-      if (i > 0) {
-        if (messageBubbles1[0].name == messageBubbles1[i].name) {
-          break;
-        }
-      }
-    }
-    print('$order');
-    final uid = await _auth.currentUser().then((value) => value.uid);
-    DocumentReference ref = await _firestore.collection("Order").add({
-      'Accepted': false,
-      'Order Time': DateTime.now(),
-      'Outlet': _firestore.collection("Outlet").document(document),
-      'Place': hostel,
-      'Price': total,
-      'User': _firestore.collection("Users").document(uid),
-    });
-    final doc = ref.documentID;
-    id = doc;
-    for (int i = 1; i < messageBubbles1.length; i++) {
-      await _firestore.collection("Order/$doc/Item").add({
-        'Name': messageBubbles1[i].name,
-        'Quantity': messageBubbles1[i].count,
-        'Price': messageBubbles1[i].price,
-        'image': messageBubbles1[i].image,
-        'reference': _firestore
-            .collection("Outlet/document/Menu")
-            .document(messageBubbles1[i].foodid),
-      });
-      if (i > 0) {
-        if (messageBubbles1[0].name == messageBubbles1[i].name) {
-          break;
-        }
-      }
-    }
-    await _firestore.collection("Users/$uid/orders").document("$doc").setData({
-      'reference': _firestore.collection("Order").document("$doc"),
-      'Outlet': _firestore.collection("Outlet").document("$document"),
-      'order': order,
-      'Price': total,
-      'Order Time': DateTime.now(),
-    });
-    await _firestore
-        .collection("Outlet/$document/orders")
-        .document("$doc")
-        .setData({
-      'reference': _firestore.collection("Order").document("$doc"),
-      'user': _firestore.collection("Users").document("$uid"),
-      'order': order,
-      'Price': total,
-      'Order Time': DateTime.now(),
-    });
-
-    return true;
-  } catch (e) {
-    print(e);
-    print('please try again');
-    return false;
   }
 }

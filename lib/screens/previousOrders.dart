@@ -8,6 +8,7 @@ FirebaseUser loggedInUser;
 int sort = 0;
 String userId;
 var reference;
+var outlet;
 
 class PreviousOrders extends StatefulWidget {
   static const routeName = '/previousOrders';
@@ -52,39 +53,36 @@ class _PreviousOrdersState extends State<PreviousOrders>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[200],
-      appBar: AppBar(
-        centerTitle: true,
-        backgroundColor: Colors.teal,
-        elevation: 5,
-        title: FittedBox(
-          fit: BoxFit.contain,
-          child: RichText(
-            text: TextSpan(
-                text: "Previous",
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 35,
-                    letterSpacing: 1,
-                    color: Colors.white),
-                children: <TextSpan>[
-                  TextSpan(
-                      text: " Orders",
-                      style: TextStyle(
-                          letterSpacing: 1,
-                          fontSize: 35,
-                          color: Colors.white,
-                          fontFamily: "Sans Serif"))
-                ]),
-          ),
-        ),
-      ),
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Container(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
+              SizedBox(
+                height: 20,
+              ),
+              Center(
+                child: RichText(
+                  text: TextSpan(
+                      text: "Previous",
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 40,
+                          letterSpacing: 1,
+                          color: Colors.teal),
+                      children: <TextSpan>[
+                        TextSpan(
+                            text: " Orders",
+                            style: TextStyle(
+                                letterSpacing: 1,
+                                fontSize: 40,
+                                color: Colors.teal,
+                                fontFamily: "Sans Serif"))
+                      ]),
+                ),
+              ),
               MessagesStream(),
             ],
           ),
@@ -113,11 +111,12 @@ class MessagesStream extends StatelessWidget {
         final messages = snapshot.data.documents;
         List<MessageBubble> messageBubbles = [];
         for (var message in messages) {
-          final order = message.data['order'];
+          var order = message.data['order'];
           final price = message.data['Price'];
           final time = message.data['Order Time'];
           final outlet = message.data['Outlet'];
           final reference = message.data['reference'];
+          order = order.toString().substring(0, order.toString().length - 2);
           print(" hi $order");
           final messageBubble = MessageBubble(
             price: price,
@@ -170,6 +169,38 @@ class _MessageBubbleState extends State<MessageBubble> {
             builder: (context) {
               return Column(
                 children: <Widget>[
+                  outlet != null
+                      ? StreamBuilder(
+                          stream: outlet.snapshots(),
+                          builder: (context, snapshot) {
+                            if (!snapshot.hasData) {
+                              return new Text("Loading");
+                            }
+                            var userDocument = snapshot.data;
+
+                            return Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Column(
+                                children: <Widget>[
+                                  Text(
+                                    userDocument["name"],
+                                    style: TextStyle(
+                                        fontSize: 40,
+                                        color: Colors.teal,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  Text(
+                                    userDocument["phone"],
+                                    style: TextStyle(
+                                        fontSize: 20,
+                                        color: Colors.teal,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ],
+                              ),
+                            );
+                          })
+                      : Container(),
                   MessagesStream1(),
                   StreamBuilder(
                       stream: widget.reference.snapshots(),
@@ -178,7 +209,103 @@ class _MessageBubbleState extends State<MessageBubble> {
                           return new Text("Loading");
                         }
                         var userDocument = snapshot.data;
-                        return Text(userDocument["Place"]);
+                        outlet = userDocument['Outlet'];
+
+                        return Column(
+                          children: <Widget>[
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Text(
+                              userDocument["Accepted"] == false ||
+                                      userDocument["Accepted"] == null
+                                  ? userDocument["Cancelled"] == false ||
+                                          userDocument["Cancelled"] == null
+                                      ? 'Waiting for the Restaurant to Accept the Order'
+                                      : "Order has been cancelled due to unavailability of item/ Restaurant has been closed"
+                                  : 'Order Accepted',
+                              style: TextStyle(
+                                  fontSize: 18,
+                                  color: Colors.blue[700],
+                                  backgroundColor: Colors.grey[200]),
+                              textAlign: TextAlign.center,
+                            ),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            userDocument['deliveryTime'] == null ||
+                                    userDocument['deliveryTime'] == ""
+                                ? Container()
+                                : Text(
+                                    'Order will reach you in ${userDocument['deliveryTime']} minutes',
+                                    style: TextStyle(
+                                        fontSize: 18,
+                                        backgroundColor: Colors.grey[200]),
+                                  ),
+                            Card(
+                              elevation: 3,
+                              child: Container(
+                                color: Colors.teal,
+                                child: Column(
+                                  children: <Widget>[
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 8),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: <Widget>[
+                                          Text(
+                                            "Total Price:  ₹",
+                                            style: TextStyle(
+                                                fontSize: 20,
+                                                color: Colors.white),
+                                          ),
+                                          Text(
+                                            userDocument["Price"].toString(),
+                                            style: TextStyle(
+                                                fontSize: 20,
+                                                color: Colors.white),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                          bottom: 8, left: 8, top: 8),
+                                      child: userDocument["Place"] == null
+                                          ? Container(
+                                              child: Text(
+                                                "Order Pickup",
+                                                style: TextStyle(
+                                                    fontSize: 20,
+                                                    color: Colors.white),
+                                              ),
+                                            )
+                                          : Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: <Widget>[
+                                                Text(
+                                                  "Location: ",
+                                                  style: TextStyle(
+                                                      fontSize: 20,
+                                                      color: Colors.white),
+                                                ),
+                                                Text(
+                                                  userDocument["Place"],
+                                                  style: TextStyle(
+                                                      fontSize: 20,
+                                                      color: Colors.white),
+                                                ),
+                                              ],
+                                            ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
                       }),
                 ],
               );
@@ -288,7 +415,16 @@ class _MessageBubbleState1 extends State<MessageBubble1> {
                 children: <Widget>[
                   Container(
                     child: widget.image == null
-                        ? null
+                        ? Padding(
+                            padding: EdgeInsets.all(
+                                MediaQuery.of(context).size.width * 0.005),
+                            child: Container(
+                              color: Colors.teal,
+                              child: Image(
+                                image: AssetImage('images/newlogo.png'),
+                              ),
+                            ),
+                          )
                         : Padding(
                             padding: EdgeInsets.all(
                                 MediaQuery.of(context).size.width * 0.005),
